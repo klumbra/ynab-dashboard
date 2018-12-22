@@ -1,0 +1,5 @@
+certifi==2018.11.29
+python-dateutil==2.7.5
+six==1.12.0
+urllib3==1.24.1
+ynab-python==1.0.0
