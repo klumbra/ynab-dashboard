@@ -21,7 +21,7 @@ def extract_ynab_cat_attrs(month, api_response):
     for category in api_response.data.month.categories:
         name = category.name
         budgeted = category.budgeted / 1000.0
-        cat_attrs.append((month, name, budgeted))
+        cat_attrs.append([month, name, budgeted])
     return cat_attrs
 
 def test_ynab():
@@ -31,6 +31,45 @@ def test_ynab():
     cat_attrs = extract_ynab_cat_attrs(month, api_response)
     pprint.pprint(cat_attrs)
 
+def get_gspread_wks():
+    from oauth2client.service_account import ServiceAccountCredentials
+    import gspread
+
+    scopes = ['https://www.googleapis.com/auth/spreadsheets']
+
+    creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scopes)
+    gc = gspread.authorize(creds)
+
+    sheet_id = get_config_val('sheet_id')
+    return gc.open_by_key(sheet_id)
+
+def del_existing_month(month, wks):
+    import pprint
+    cell_list = wks.findall(month)
+    
+    for cell in reversed(cell_list):
+        wks.delete_row(cell.row) # slow given separate API call per del
+
+def next_available_row(wks):
+    str_list = list(filter(None, wks.col_values(1)))
+    return str(len(str_list)+1)
+
+def insert_new_data(ynab_data, sh, sheet_name):
+    import gspread
+    next_row = next_available_row(sh.worksheet(sheet_name))
+    sh.values_update(
+        '{}!A{}'.format(sheet_name, next_row),
+        params={'valueInputOption': 'RAW'},
+        body={'values': ynab_data}
+    )
+
 def main():
+    month = '2018-12-01'
+    ynab_api_response = get_ynab_month(month)
+    ynab_data = extract_ynab_cat_attrs(month, ynab_api_response)
+    sh = get_gspread_wks()
+    sheet_name = 'Data'
+    del_existing_month(month, sh.worksheet(sheet_name))
+    insert_new_data(ynab_data, sh, sheet_name)
 
 main()
