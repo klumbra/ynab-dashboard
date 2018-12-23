@@ -32,6 +32,5 @@ def test_ynab():
     pprint.pprint(cat_attrs)
 
 def main():
-    test_ynab()
 
 main()
