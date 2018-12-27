@@ -59,9 +59,27 @@ def insert_new_data(ynab_data, sh, sheet_name):
     next_row = next_available_row(sh.worksheet(sheet_name))
     sh.values_update(
         '{}!A{}'.format(sheet_name, next_row),
-        params={'valueInputOption': 'RAW'},
+        params={'valueInputOption': 'USER_ENTERED'},
         body={'values': ynab_data}
     )
+
+def copy_bucket_lookup_formula(month, wks):
+    formula_col = 'D'
+    formula_row = 2
+    formula_cell = '{}{}'.format(formula_col, formula_row)
+    formula = wks.acell(formula_cell, value_render_option='FORMULA').value
+
+    lookup_col = 'B'
+    lookup_cell = '{}{}'.format(lookup_col, formula_row)
+    
+    new_month_cells = wks.findall(month)
+    
+    for cell in new_month_cells:
+        row = cell.row
+        relative_lookup_cell = '{}{}'.format(lookup_col, row)
+        relative_formula_cell = '{}{}'.format(formula_col, row)
+        relative_formula = formula.replace(lookup_cell, relative_lookup_cell)
+        wks.update_acell(relative_formula_cell, relative_formula)
 
 def main():
     month = '2018-12-01'
@@ -73,5 +91,6 @@ def main():
     wks = sh.worksheet(sheet_name)
     del_existing_month(month, wks)
     insert_new_data(ynab_data, sh, sheet_name)
+    copy_bucket_lookup_formula(month, wks)
 
 main()
