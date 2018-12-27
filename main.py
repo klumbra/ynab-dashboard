@@ -65,11 +65,13 @@ def insert_new_data(ynab_data, sh, sheet_name):
 
 def main():
     month = '2018-12-01'
+    sheet_name = 'Data'
+
     ynab_api_response = get_ynab_month(month)
     ynab_data = extract_ynab_cat_attrs(month, ynab_api_response)
     sh = get_gspread_wks()
-    sheet_name = 'Data'
-    del_existing_month(month, sh.worksheet(sheet_name))
+    wks = sh.worksheet(sheet_name)
+    del_existing_month(month, wks)
     insert_new_data(ynab_data, sh, sheet_name)
 
 main()
