@@ -81,16 +81,13 @@ def copy_bucket_lookup_formula(month, wks):
         relative_formula = formula.replace(lookup_cell, relative_lookup_cell)
         wks.update_acell(relative_formula_cell, relative_formula)
 
-def main():
-    month = '2018-12-01'
-    sheet_name = 'Data'
+month = '2018-12-01'
+sheet_name = 'Data'
 
-    ynab_api_response = get_ynab_month(month)
-    ynab_data = extract_ynab_cat_attrs(month, ynab_api_response)
-    sh = get_gspread_wks()
-    wks = sh.worksheet(sheet_name)
-    del_existing_month(month, wks)
-    insert_new_data(ynab_data, sh, sheet_name)
-    copy_bucket_lookup_formula(month, wks)
-
-main()
+ynab_api_response = get_ynab_month(month)
+ynab_data = extract_ynab_cat_attrs(month, ynab_api_response)
+sh = get_gspread_wks()
+wks = sh.worksheet(sheet_name)
+del_existing_month(month, wks)
+insert_new_data(ynab_data, sh, sheet_name)
+copy_bucket_lookup_formula(month, wks)
