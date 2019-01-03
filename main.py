@@ -63,8 +63,17 @@ def insert_new_data(ynab_data, sh, sheet_name):
         body={'values': ynab_data}
     )
 
+def colnum_string(n):
+    string = ""
+    while n > 0:
+        n, remainder = divmod(n - 1, 26)
+        string = chr(65 + remainder) + string
+    return string
+
 def copy_bucket_lookup_formula(month, wks):
-    formula_col = 'D'
+    import gspread
+    formula_col_num = 4
+    formula_col = colnum_string(formula_col_num)
     formula_row = 2
     formula_cell = '{}{}'.format(formula_col, formula_row)
     formula = wks.acell(formula_cell, value_render_option='FORMULA').value
@@ -73,13 +82,15 @@ def copy_bucket_lookup_formula(month, wks):
     lookup_cell = '{}{}'.format(lookup_col, formula_row)
     
     new_month_cells = wks.findall(month)
+    new_formula_cells = []
     
-    for cell in new_month_cells:
-        row = cell.row
+    for month_cell in new_month_cells:
+        row = month_cell.row
         relative_lookup_cell = '{}{}'.format(lookup_col, row)
         relative_formula_cell = '{}{}'.format(formula_col, row)
         relative_formula = formula.replace(lookup_cell, relative_lookup_cell)
-        wks.update_acell(relative_formula_cell, relative_formula)
+        new_formula_cells.append(gspread.models.Cell(row, formula_col_num, relative_formula))
+    wks.update_cells(new_formula_cells, value_input_option='USER_ENTERED')
 
 month = '2018-12-01'
 sheet_name = 'Data'
