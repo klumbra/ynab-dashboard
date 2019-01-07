@@ -2,3 +2,6 @@
 config.ini
 venv/*
 credentials.json
+airflow/*
+!airflow/airflow.cfg
+!airflow/dags/*
