@@ -1,4 +1,17 @@
 def get_ynab_month(month):
+    """
+    Gets YNAB data
+
+    Retrieves YNAB budget API data pertaining to given month.
+
+    Args:
+        month: Month we want data for, as YYYY-MM-DD string
+
+    Returns:
+        A YNAB API MonthDetailResponse object, which includes budget and
+        category-level data.
+    """
+
     import ynab
 
     configuration = ynab.Configuration()
@@ -10,6 +23,18 @@ def get_ynab_month(month):
     return api_response
 
 def get_config_val(key):
+    """
+    Gets a config value, given a key
+
+    Looks up value from config file given a key. Used for secrets like API keys.
+
+    Args:
+        key: key for config value
+
+    Returns:
+        value: corresponding value stored in config file for given key
+    """
+
     import configparser
 
     config = configparser.ConfigParser()
