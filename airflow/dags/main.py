@@ -156,6 +156,7 @@ dag = DAG(dag_id='ynab',
 
 ynab_task = PythonOperator(
     task_id='ynab_task',
+    provide_context=True,
     python_callable=print_the_date,
     dag=dag)
 
