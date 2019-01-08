@@ -1,3 +1,8 @@
+from datetime import datetime, timedelta
+from airflow.operators import PythonOperator
+from airflow.models import DAG
+from airflow.utils import dates
+
 def get_ynab_month(month):
     """
     Gets YNAB data
@@ -117,13 +122,40 @@ def copy_bucket_lookup_formula(month, wks):
         new_formula_cells.append(gspread.models.Cell(row, formula_col_num, relative_formula))
     wks.update_cells(new_formula_cells, value_input_option='USER_ENTERED')
 
-month = '2018-12-01'
-sheet_name = 'Data'
+def print_the_date(ds, **kwargs):
+    import logging
+    from pprint import pprint
 
-ynab_api_response = get_ynab_month(month)
-ynab_data = extract_ynab_cat_attrs(month, ynab_api_response)
-sh = get_gspread_wks()
-wks = sh.worksheet(sheet_name)
-del_existing_month(month, wks)
-insert_new_data(ynab_data, sh, sheet_name)
-copy_bucket_lookup_formula(month, wks)
+    logging.info(ds)
+
+
+def ynab(ds, **kwargs):
+    month = '2018-12-01'
+    sheet_name = 'Data'
+
+    ynab_api_response = get_ynab_month(month)
+    ynab_data = extract_ynab_cat_attrs(month, ynab_api_response)
+    sh = get_gspread_wks()
+    wks = sh.worksheet(sheet_name)
+    del_existing_month(month, wks)
+    insert_new_data(ynab_data, sh, sheet_name)
+    copy_bucket_lookup_formula(month, wks)
+
+default_args = {
+    'owner': 'kyle',
+    'depends_on_past': False,
+    'start_date': dates.days_ago(1),
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+}
+
+dag = DAG(dag_id='ynab',
+          default_args=default_args,
+          schedule_interval='1 13 * * *',
+          dagrun_timeout=timedelta(minutes=1))
+
+ynab_task = PythonOperator(
+    task_id='ynab_task',
+    python_callable=print_the_date,
+    dag=dag)
+
