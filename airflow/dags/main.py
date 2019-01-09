@@ -122,15 +122,14 @@ def copy_bucket_lookup_formula(month, wks):
         new_formula_cells.append(gspread.models.Cell(row, formula_col_num, relative_formula))
     wks.update_cells(new_formula_cells, value_input_option='USER_ENTERED')
 
-def print_the_date(ds, **kwargs):
-    import logging
-    from pprint import pprint
-
-    logging.info(ds)
-
+def first_of_month(month_str):
+    date_format = '%Y-%m-%d'
+    month = datetime.strptime(month_str, date_format)
+    month_truncated = month.replace(day=1)
+    return month_truncated.strftime(date_format)
 
 def ynab(ds, **kwargs):
-    month = '2018-12-01'
+    month = first_of_month(ds)
     sheet_name = 'Data'
 
     ynab_api_response = get_ynab_month(month)
@@ -157,6 +156,6 @@ dag = DAG(dag_id='ynab',
 ynab_task = PythonOperator(
     task_id='ynab_task',
     provide_context=True,
-    python_callable=print_the_date,
+    python_callable=ynab,
     dag=dag)
 
