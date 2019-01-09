@@ -151,7 +151,7 @@ default_args = {
 
 dag = DAG(dag_id='ynab',
           default_args=default_args,
-          schedule_interval='1 13 * * *',
+          schedule_interval='*/5 * * * *',
           dagrun_timeout=timedelta(minutes=1))
 
 ynab_task = PythonOperator(
