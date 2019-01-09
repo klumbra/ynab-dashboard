@@ -143,9 +143,9 @@ def ynab(ds, **kwargs):
 default_args = {
     'owner': 'kyle',
     'depends_on_past': False,
-    'start_date': dates.days_ago(1),
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
+    'start_date': datetime(2019, 1, 8, 19, 20, 0),
 }
 
 dag = DAG(dag_id='ynab',
