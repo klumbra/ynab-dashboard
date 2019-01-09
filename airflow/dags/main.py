@@ -3,6 +3,8 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.models import DAG
 from airflow.utils import dates
 
+ROW_DELETION_LIMIT = 100
+
 def get_ynab_month(month):
     """
     Gets YNAB data
@@ -76,9 +78,12 @@ def get_gspread_wks():
 def del_existing_month(month, wks):
     import pprint
     cell_list = wks.findall(month)
-    
-    for cell in reversed(cell_list):
-        wks.delete_row(cell.row) # slow given separate API call per del
+
+    if len(cell_list) > ROW_DELETION_LIMIT: # prevent erroneous mass deletion of rows
+        raise Exception('Excessive row deletion requested, aborting...')
+    else:
+        for cell in reversed(cell_list):
+            wks.delete_row(cell.row) # slow given separate API call per del
 
 def next_available_row(wks):
     str_list = list(filter(None, wks.col_values(1)))
