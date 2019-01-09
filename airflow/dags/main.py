@@ -142,15 +142,13 @@ def ynab(ds, **kwargs):
 
 default_args = {
     'owner': 'kyle',
-    'depends_on_past': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
     'start_date': datetime(2019, 1, 8, 19, 20, 0),
 }
 
 dag = DAG(dag_id='ynab',
           default_args=default_args,
           schedule_interval='*/5 * * * *',
+          catchup=False,
           dagrun_timeout=timedelta(minutes=1))
 
 ynab_task = PythonOperator(
